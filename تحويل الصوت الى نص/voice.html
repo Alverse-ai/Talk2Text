@@ -1,0 +1,612 @@
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تحويل الصوت إلى نص | Speech-to-Text</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0A2463;
+            --secondary: #D8BFD8;
+            --accent: #FF6B6B;
+            --dark: #1E1E2A;
+            --light: #F8F9FA;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --gray: #6C757D;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 42px;
+            color: var(--primary);
+            margin-left: 15px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .app-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--light);
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 18px;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            color: var(--gray);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: rgba(10, 36, 99, 0.05);
+        }
+
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--secondary);
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: var(--transition);
+            background: rgba(216, 191, 216, 0.1);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(10, 36, 99, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn i {
+            margin-left: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #08308a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(10, 36, 99, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #d0a9d0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(216, 191, 216, 0.2);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
+        }
+
+        .language-selector {
+            margin: 25px 0;
+        }
+
+        .language-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+            background: white;
+            color: var(--dark);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .recorder {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .recorder-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .recorder-time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 15px;
+        }
+
+        .recorder-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .recorder-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .recorder-btn.recording {
+            background: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .text-result {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.8;
+            border: 1px solid #eee;
+        }
+
+        .share-section {
+            margin-top: 25px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(10, 36, 99, 0.05);
+            border-radius: 10px;
+        }
+
+        .share-input {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        .share-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px 0 0 10px;
+            font-size: 1rem;
+        }
+
+        .share-input button {
+            border-radius: 0 10px 10px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: auto;
+            padding: 20px;
+            color: var(--gray);
+            width: 100%;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 220px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .feature p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tab {
+                padding: 15px 10px;
+                font-size: 1rem;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .share-input {
+                flex-direction: column;
+            }
+            
+            .share-input input {
+                border-radius: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .share-input button {
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-microphone-alt"></i>
+                <h1>تحويل الصوت إلى نص</h1>
+            </div>
+            <p class="subtitle">حوّل صوتك إلى نص مكتوب بدقة عالية باستخدام الذكاء الاصطناعي</p>
+        </header>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-language"></i>
+                <h3>يدعم عدة لغات</h3>
+                <p>العربية، الإنجليزية، الفرنسية وغيرها</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-brain"></i>
+                <h3>ذكاء اصطناعي متقدم</h3>
+                <p>دقة عالية في التعرف على الكلام</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-file-export"></i>
+                <h3>تصدير بمختلف الصيغ</h3>
+                <p>TXT و SRT للترجمة في الفيديوهات</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-share-alt"></i>
+                <h3>مشاركة النتائج</h3>
+                <p>مشاركة النص برابط مباشر</p>
+            </div>
+        </div>
+
+        <div class="app-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="upload">رفع ملف صوتي</div>
+                <div class="tab" data-tab="record">التسجيل المباشر</div>
+            </div>
+
+            <div class="tab-content">
+                <!-- رفع ملف -->
+                <div class="tab-pane active" id="upload-tab">
+                    <div class="upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p class="upload-text">اسحب وأسقط ملفك الصوتي هنا أو</p>
+                        <button class="btn btn-primary"><i class="fas fa-upload"></i> استعرض الملفات</button>
+                    </div>
+
+                    <div class="language-selector">
+                        <label for="language">اختر لغة الصوت:</label>
+                        <select id="language">
+                            <option value="ar">العربية</option>
+                            <option value="en">الإنجليزية</option>
+                            <option value="fr">الفرنسية</option>
+                            <option value="es">الإسبانية</option>
+                            <option value="de">الألمانية</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-accent" style="width: 100%;"><i class="fas fa-cogs"></i> بدء التحويل</button>
+                </div>
+
+                <!-- تسجيل مباشر -->
+                <div class="tab-pane" id="record-tab">
+                    <div class="recorder">
+                        <div class="recorder-display">
+                            <div class="recorder-time">00:00</div>
+                            <div class="recorder-btn">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                        </div>
+
+                        <p>اضغط على زر الميكروفون لبدء التسجيل</p>
+                    </div>
+
+                    <div class="language-selector">
+                        <label for="record-language">اختر لغة الصوت:</label>
+                        <select id="record-language">
+                            <option value="ar">العربية</option>
+                            <option value="en">الإنجليزية</option>
+                            <option value="fr">الفرنسية</option>
+                            <option value="es">الإسبانية</option>
+                            <option value="de">الألمانية</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-accent" style="width: 100%;"><i class="fas fa-cogs"></i> تحويل التسجيل</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نتائج التحويل -->
+        <div class="app-container result-container" id="result-section">
+            <div class="result-header">
+                <h2 class="result-title">النص المتحول</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary"><i class="fas fa-download"></i> TXT</button>
+                    <button class="btn btn-secondary"><i class="fas fa-download"></i> SRT</button>
+                </div>
+            </div>
+
+            <div class="text-result">
+                <p>هنا سيظهر النص بعد التحويل من الصوت. يمكنك نسخ النص أو تحميله بصيغة TXT أو SRT للترجمة في الفيديوهات.</p>
+            </div>
+
+            <div class="share-section">
+                <h3>مشاركة النتيجة</h3>
+                <p>يمكنك مشاركة هذا النص مع الآخرين عبر الرابط التالي:</p>
+                <div class="share-input">
+                    <input type="text" value="https://short.url/12345" readonly>
+                    <button class="btn btn-primary"><i class="fas fa-copy"></i> نسخ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 تطبيق تحويل الصوت إلى نص. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <script>
+        // تبويبات واجهة التطبيق
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // محاكاة عملية التحويل
+        document.querySelectorAll('.btn-accent').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // عرض رسالة تحميل
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحويل...';
+                btn.disabled = true;
+                
+                // محاكاة الانتظار لمدة 3 ثواني
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-cogs"></i> بدء التحويل';
+                    btn.disabled = false;
+                    
+                    // عرض قسم النتائج
+                    document.getElementById('result-section').style.display = 'block';
+                    
+                    // إضافة نص كمثال
+                    document.querySelector('.text-result').innerHTML = `
+                        <p>مرحبًا بك في تطبيق تحويل الصوت إلى نص. هذا النص هو مثال للنص الذي سيتم تحويله من ملفك الصوتي.</p>
+                        <p>يمكنك الآن نسخ هذا النص أو تحميله بصيغ مختلفة لمشاركته مع الآخرين أو استخدامه في أعمالك.</p>
+                        <p>نتمنى أن تجد هذه الخدمة مفيدة وتوفر عليك الوقت والجهد في كتابة النصوص يدويًا.</p>
+                    `;
+                }, 3000);
+            });
+        });
+
+        // محاكاة التسجيل
+        const recordBtn = document.querySelector('.recorder-btn');
+        let recording = false;
+        let seconds = 0;
+        let timer;
+
+        recordBtn.addEventListener('click', () => {
+            if (!recording) {
+                // بدء التسجيل
+                recording = true;
+                recordBtn.classList.add('recording');
+                recordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                
+                // بدء المؤقت
+                timer = setInterval(() => {
+                    seconds++;
+                    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    const secs = (seconds % 60).toString().padStart(2, '0');
+                    document.querySelector('.recorder-time').textContent = `${mins}:${secs}`;
+                }, 1000);
+            } else {
+                // إيقاف التسجيل
+                recording = false;
+                recordBtn.classList.remove('recording');
+                recordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                clearInterval(timer);
+            }
+        });
+    </script>
+</body>
+</html>
